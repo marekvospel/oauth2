@@ -1,1 +1,16 @@
+# Package managers
 /target
+node_modules
+
+# .env.local
+*.local
+
+# Logs
+*.log*
+
+# Build files
+.nuxt
+.nitro
+.cache
+.output
+dist
