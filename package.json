@@ -1,5 +1,8 @@
 {
   "name": "@vospel/oauth2-workspace",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@types/express": "^4.17.17"
+  }
 }
