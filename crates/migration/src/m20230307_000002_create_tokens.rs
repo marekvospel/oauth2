@@ -19,14 +19,19 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(AccessTokens::Refresh).string().unique_key())
-                    .col(ColumnDef::new(AccessTokens::Owner).big_integer().not_null())
                     .col(
                         ColumnDef::new(AccessTokens::Expire)
                             .timestamp_with_time_zone()
                             .not_null(),
                     )
+                    .col(ColumnDef::new(AccessTokens::Owner).big_integer().not_null())
                     .col(ColumnDef::new(AccessTokens::ClientId).big_integer())
                     .col(ColumnDef::new(AccessTokens::Scope).string().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(AccessTokens::Table, AccessTokens::Owner)
+                            .to(Users::Table, Users::Id),
+                    )
                     .to_owned(),
             )
             .await
@@ -50,4 +55,10 @@ enum AccessTokens {
     Expire,
     ClientId,
     Scope,
+}
+
+#[derive(Iden)]
+enum Users {
+    Table,
+    Id,
 }
