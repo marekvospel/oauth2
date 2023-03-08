@@ -10,26 +10,32 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(AccessTokens::Table)
+                    .table(Tokens::Table)
                     .if_not_exists()
                     .col(
-                        ColumnDef::new(AccessTokens::Token)
+                        ColumnDef::new(Tokens::Token)
                             .string()
                             .not_null()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(AccessTokens::Refresh).string().unique_key())
+                    .col(ColumnDef::new(Tokens::Refresh).string().unique_key())
                     .col(
-                        ColumnDef::new(AccessTokens::Expire)
+                        ColumnDef::new(Tokens::TokenType)
+                            .string()
+                            .not_null()
+                            .default("bearer"),
+                    )
+                    .col(
+                        ColumnDef::new(Tokens::Expire)
                             .timestamp_with_time_zone()
                             .not_null(),
                     )
-                    .col(ColumnDef::new(AccessTokens::Owner).big_integer().not_null())
-                    .col(ColumnDef::new(AccessTokens::ClientId).big_integer())
-                    .col(ColumnDef::new(AccessTokens::Scope).string().not_null())
+                    .col(ColumnDef::new(Tokens::Owner).big_integer().not_null())
+                    .col(ColumnDef::new(Tokens::ClientId).big_integer())
+                    .col(ColumnDef::new(Tokens::Scope).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .from(AccessTokens::Table, AccessTokens::Owner)
+                            .from(Tokens::Table, Tokens::Owner)
                             .to(Users::Table, Users::Id),
                     )
                     .to_owned(),
@@ -40,17 +46,18 @@ impl MigrationTrait for Migration {
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         // Replace the sample below with your own migration scripts
         manager
-            .drop_table(Table::drop().table(AccessTokens::Table).to_owned())
+            .drop_table(Table::drop().table(Tokens::Table).to_owned())
             .await
     }
 }
 
 /// Learn more at https://docs.rs/sea-query#iden
 #[derive(Iden)]
-enum AccessTokens {
+enum Tokens {
     Table,
     Token,
     Refresh,
+    TokenType,
     Owner,
     Expire,
     ClientId,

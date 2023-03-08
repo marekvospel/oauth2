@@ -4,12 +4,13 @@ use time::OffsetDateTime;
 
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
-#[sea_orm(table_name = "access_tokens")]
+#[sea_orm(table_name = "tokens")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub token: String,
     #[sea_orm(unique)]
     pub refresh: Option<String>,
+    pub token_type: String,
 
     pub owner: i64,
     pub expire: OffsetDateTime,
