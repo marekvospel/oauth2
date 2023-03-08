@@ -1,8 +1,8 @@
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
-use time::Time;
+use time::OffsetDateTime;
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Deserialize, Serialize, FromForm)]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
 #[sea_orm(table_name = "access_tokens")]
 pub struct Model {
@@ -12,7 +12,7 @@ pub struct Model {
     pub refresh: Option<String>,
 
     pub owner: i64,
-    pub expire: Time,
+    pub expire: OffsetDateTime,
     pub client_id: Option<i64>,
     pub scope: String,
 }

@@ -10,6 +10,7 @@ rocket = { version = "0.5.0-rc.2", features = ["serde_json", "json"] }
 bcrypt = "0.14.0"
 sea-orm-rocket = "0.5.2"
 entity = { path = "../entity" }
+time = "0.3.20"
 
 [dependencies.sea-orm]
 version = "0.11.0"

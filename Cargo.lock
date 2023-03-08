@@ -152,6 +152,7 @@ dependencies = [
  "rocket",
  "sea-orm",
  "sea-orm-rocket",
+ "time",
 ]
 
 [[package]]
