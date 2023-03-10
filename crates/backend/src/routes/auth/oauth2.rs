@@ -1,3 +1,5 @@
+use crate::Db;
+use ::entity::connection;
 use oauth2::basic::BasicClient;
 use oauth2::reqwest::async_http_client;
 use oauth2::{
@@ -6,6 +8,8 @@ use oauth2::{
 };
 use rocket::response::Redirect;
 use rocket::serde::{Deserialize, Serialize};
+use sea_orm::*;
+use sea_orm_rocket::Connection;
 
 fn discord_oauth() -> BasicClient {
     BasicClient::new(
@@ -37,8 +41,9 @@ struct DiscordUserResponse {
 }
 
 #[get("/auth/discord?<code>", rank = 0)]
-pub async fn discord_authorize(code: String) {
+pub async fn discord_authorize(code: String, db: Connection<'_, Db>) {
     let client = discord_oauth();
+    let db = db.into_inner();
 
     let token = client
         .exchange_code(AuthorizationCode::new(code))
@@ -71,5 +76,18 @@ pub async fn discord_authorize(code: String) {
     }
     let response = response.unwrap();
 
-    println!("{response:?}")
+    println!("{response:?}");
+
+    let con = connection::Entity::find()
+        .filter(connection::Column::ConnectionType.eq("discord".to_string()))
+        .filter(connection::Column::ConnectionId.eq(response.id.to_string()))
+        .one(db)
+        .await;
+    if con.is_err() {
+        error!("{:?}", con.unwrap_err());
+        return;
+    }
+    let con = con.unwrap();
+
+    println!("{con:?}");
 }
