@@ -76,9 +76,9 @@ job "oauth-nomad" {
       }
 
       env {
-        ROCKET_DATABASES = '{ sea_orm = { url = "postgres://postgres:mysecretpassword@localhost:5432" } }'
-        ROCKET_ADDRESS = '0.0.0.0'
-        ROCKET_PORT = '80'
+        ROCKET_DATABASES = "{ sea_orm = { url = \"postgres://postgres:mysecretpassword@localhost:5432\" } }"
+        ROCKET_ADDRESS = "0.0.0.0"
+        ROCKET_PORT = "80"
       }
 
       lifecycle {
