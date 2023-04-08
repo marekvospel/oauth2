@@ -1,8 +1,9 @@
 use crate::database::Db;
 use ::entity::token;
 use ::entity::user;
+use argon2::password_hash::Error as ArgonError;
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use base64::Engine;
-use bcrypt::BcryptError;
 use rand::rngs::OsRng;
 use rand::Error as RandError;
 use rand::RngCore;
@@ -51,10 +52,10 @@ impl<'r> Responder<'r, 'static> for LoginSuccess {
 pub enum LoginError {
     #[error("Invalid Credentials")]
     InvalidCredentials,
+    #[error("Internal server error")]
+    InternalServerError,
     #[error("Db error: {0}")]
     DbError(#[from] DbErr),
-    #[error("bCrypt error: {0}")]
-    BCryptError(#[from] BcryptError),
     #[error("Rand error: {0}")]
     RandError(#[from] RandError),
 }
@@ -95,10 +96,18 @@ pub async fn login(
         return Err(LoginError::InvalidCredentials);
     }
     let user = user.unwrap();
-    let correct_password = bcrypt::verify(&input.password, &user.password)?;
+    let hash = match PasswordHash::new(&user.password) {
+        Ok(h) => h,
+        Err(_) => return Err(LoginError::InternalServerError),
+    };
+    let correct_password = Argon2::default().verify_password(input.password.as_bytes(), &hash);
 
-    if !correct_password {
-        return Err(LoginError::InvalidCredentials);
+    if let Err(e) = correct_password {
+        if let ArgonError::Password = e {
+            return Err(LoginError::InvalidCredentials);
+        } else {
+            return Err(LoginError::InternalServerError);
+        }
     }
 
     let mut rng = OsRng::default();
