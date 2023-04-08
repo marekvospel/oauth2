@@ -1,19 +1,20 @@
 
-job "oauth-nomad" {
+job "oauth" {
 
-  group "database" {
+  group "oauth-database" {
     count = 1
 
     network {
       mode = "bridge"
-      port "db" {
-        to = 5432
+
+      port "postgres" {
+        static = "5432"
       }
     }
 
     service {
       name = "oauth-postgres"
-      port = "db"
+      port = "5432"
 
       connect {
         sidecar_service {}
@@ -39,17 +40,19 @@ job "oauth-nomad" {
 
   }
 
-  group "backend" {
+  group "oauth-api" {
+
     network {
       mode = "bridge"
-      port "http" {
-        to = 80
+
+      port "api" {
+        static = 80
       }
     }
 
     service {
-      name = "oauth-backend"
-      port = "http"
+      name = "oauth-api"
+      port = "80"
 
       connect {
         sidecar_service {
@@ -63,7 +66,7 @@ job "oauth-nomad" {
       }
     }
 
-    task "backend" {
+    task "oauth-api" {
       driver = "docker"
 
       config {
@@ -76,16 +79,12 @@ job "oauth-nomad" {
       }
 
       env {
-        ROCKET_DATABASES = "{ sea_orm = { url = \"postgres://postgres:mysecretpassword@localhost:5432\" } }"
+        ROCKET_DATABASES = "{ sea_orm = { url = \"postgres://postgres:mysecretpassword@127.0.0.1:5432\" } }"
         ROCKET_ADDRESS = "0.0.0.0"
         ROCKET_PORT = "80"
-      }
-
-      lifecycle {
-        hook = "prestart"
-        sidecar = true
       }
     }
   }
 
 }
+
