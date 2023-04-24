@@ -123,7 +123,7 @@ pub async fn login(
         owner: ActiveValue::Set(user.id),
         expire: ActiveValue::Set(OffsetDateTime::now_utc().add(Duration::days(7))),
         client_id: ActiveValue::Set(None),
-        scope: ActiveValue::Set("".into()),
+        scope: ActiveValue::Set("me".into()),
     };
     token.insert(db).await?;
 

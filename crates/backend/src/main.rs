@@ -3,8 +3,12 @@
 #[macro_use]
 extern crate rocket;
 
+use rocket::async_trait;
 use rocket::fairing::AdHoc;
-use rocket::{fairing, Build, Rocket};
+use rocket::http::Status;
+use rocket::request::FromRequest;
+use rocket::request::Outcome;
+use rocket::{fairing, Build, Request, Rocket};
 use sea_orm_rocket::Database;
 
 use crate::database::Db;
@@ -24,12 +28,17 @@ fn rocket() -> _ {
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .mount(
-            "/",
-            routes![
-                routes::auth::login::login,
-                routes::auth::oauth2::discord_redirect,
-                routes::auth::oauth2::discord_authorize
-            ],
-        )
+        .mount("/", routes![routes::auth::login::login, routes::me::me,])
+}
+
+pub struct Token(String);
+
+#[async_trait]
+impl<'r> FromRequest<'r> for Token {
+    type Error = ();
+
+    async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        let token = request.headers().get_one("Authorization").unwrap_or("");
+        Outcome::Success(Token(token.to_string()))
+    }
 }
