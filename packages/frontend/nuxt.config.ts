@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     '@unocss/nuxt',
     '@nuxtjs/i18n',
     '@nuxt/devtools',
+    '@vueuse/nuxt'
   ],
   css: [
     '@unocss/reset/tailwind.css'

@@ -1,4 +1,5 @@
 use crate::database::Db;
+use crate::error::CustomError;
 use crate::utils::auth::generate_token;
 use ::entity::token;
 use ::entity::user;
@@ -7,15 +8,11 @@ use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use rocket::http::Cookie;
 use rocket::http::CookieJar;
 use rocket::http::SameSite;
-use rocket::http::{ContentType, Status};
-use rocket::response::Responder;
+use rocket::http::Status;
 use rocket::serde::{json::Json, Deserialize, Serialize};
-use rocket::{Request, Response};
 use sea_orm::*;
 use sea_orm_rocket::Connection;
-use std::io::Cursor;
 use std::ops::Add;
-use thiserror::Error;
 use time::{Duration, OffsetDateTime};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -25,42 +22,12 @@ pub struct LoginData {
     password: String,
 }
 
-#[derive(Debug, Error)]
-pub enum LoginError {
-    #[error("Invalid Credentials")]
-    InvalidCredentials,
-    #[error("Internal server error")]
-    InternalServerError,
-    #[error("Db error: {0}")]
-    DbError(#[from] DbErr),
-}
-
-#[rocket::async_trait]
-impl<'r> Responder<'r, 'static> for LoginError {
-    fn respond_to(self, _: &'r Request<'_>) -> rocket::response::Result<'static> {
-        let (status, message) = match self {
-            LoginError::InvalidCredentials => (Status::Unauthorized, "Invalid credentials"),
-            _ => {
-                error!("{self}");
-                (Status::InternalServerError, "Internal server error")
-            }
-        };
-        let message = format!("{{ \"error\": \"{message}\" }}");
-
-        Response::build()
-            .header(ContentType::JSON)
-            .status(status)
-            .sized_body(message.len(), Cursor::new(message))
-            .ok()
-    }
-}
-
 #[post("/api/auth/login", data = "<input>")]
 pub async fn login(
     db: Connection<'_, Db>,
     input: Json<LoginData>,
     cookies: &CookieJar<'_>,
-) -> Result<(), LoginError> {
+) -> Result<(), CustomError> {
     let db = db.into_inner();
 
     let user = user::Entity::find()
@@ -69,21 +36,25 @@ pub async fn login(
         .await?;
 
     if user.is_none() {
-        return Err(LoginError::InvalidCredentials);
+        return Err(CustomError::Custom(
+            Status::Unauthorized,
+            "Invalid credentials".into(),
+        ));
     }
     let user = user.unwrap();
     let hash = match PasswordHash::new(&user.password) {
         Ok(h) => h,
-        Err(_) => return Err(LoginError::InternalServerError),
+        Err(_) => return Err(CustomError::Simple),
     };
     let correct_password = Argon2::default().verify_password(input.password.as_bytes(), &hash);
 
     if let Err(e) = correct_password {
-        if let ArgonError::Password = e {
-            return Err(LoginError::InvalidCredentials);
-        } else {
-            return Err(LoginError::InternalServerError);
-        }
+        return Err(match e {
+            ArgonError::Password => {
+                CustomError::Custom(Status::Unauthorized, "Invalid Credentials".into())
+            }
+            _ => CustomError::Simple,
+        });
     }
 
     let access_token = generate_token();

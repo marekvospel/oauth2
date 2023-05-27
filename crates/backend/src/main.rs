@@ -12,6 +12,7 @@ use crate::database::Db;
 use migration::MigratorTrait;
 
 mod database;
+mod error;
 mod routes;
 mod utils;
 
