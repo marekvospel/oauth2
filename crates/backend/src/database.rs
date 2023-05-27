@@ -1,4 +1,10 @@
-use rocket::async_trait;
+use redis::{Client, Connection};
+use rocket::{
+    async_trait,
+    fairing::Fairing,
+    serde::{Deserialize, Serialize},
+    Rocket,
+};
 use sea_orm::ConnectOptions;
 use sea_orm_rocket::{rocket::figment::Figment, Config, Database};
 use std::time::Duration;
@@ -35,5 +41,37 @@ impl sea_orm_rocket::Pool for SeaOrmPool {
 
     fn borrow(&self) -> &Self::Connection {
         &self.conn
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+struct RedisConfig {
+    pub url: String,
+}
+
+pub struct RedisFairing;
+
+#[rocket::async_trait]
+impl Fairing for RedisFairing {
+    fn info(&self) -> rocket::fairing::Info {
+        rocket::fairing::Info {
+            name: "Redis",
+            kind: rocket::fairing::Kind::Ignite,
+        }
+    }
+
+    async fn on_ignite(
+        &self,
+        rocket: Rocket<rocket::Build>,
+    ) -> rocket::fairing::Result<Rocket<rocket::Build>, Rocket<rocket::Build>> {
+        let config = rocket
+            .figment()
+            .extract_inner::<RedisConfig>("databases.redis")
+            .unwrap();
+
+        let client = Client::open(config.url).unwrap();
+
+        Ok(rocket.manage(client))
     }
 }

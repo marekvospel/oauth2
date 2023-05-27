@@ -56,8 +56,6 @@ pub enum LoginError {
     InternalServerError,
     #[error("Db error: {0}")]
     DbError(#[from] DbErr),
-    #[error("Rand error: {0}")]
-    RandError(#[from] RandError),
 }
 
 #[rocket::async_trait]
@@ -112,18 +110,18 @@ pub async fn login(
 
     let mut rng = OsRng::default();
     let mut result = [0; 256];
-    rng.try_fill_bytes(&mut result)?;
+    rng.fill_bytes(&mut result);
     let access_token = base64::engine::general_purpose::STANDARD.encode(result);
 
     let token = token::ActiveModel {
         token: ActiveValue::Set(access_token.clone()),
         refresh: ActiveValue::Set(None),
         // This token is not meant to be used in the Authorization header, but in
-        token_type: ActiveValue::Set("app_token".into()),
+        token_type: ActiveValue::Set("Bearer".into()),
         owner: ActiveValue::Set(user.id),
         expire: ActiveValue::Set(OffsetDateTime::now_utc().add(Duration::days(7))),
         client_id: ActiveValue::Set(None),
-        scope: ActiveValue::Set("".into()),
+        scope: ActiveValue::Set("me".into()),
     };
     token.insert(db).await?;
 
