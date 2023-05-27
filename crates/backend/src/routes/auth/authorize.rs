@@ -108,7 +108,7 @@ pub async fn authorize(
         scope: body.scope.clone(),
         state: body.state.clone(),
         application_id: body.client_id,
-        redirect_uri: body.redirect_uri,
+        redirect_uri: body.redirect_uri.clone(),
     };
 
     let _: () = redis
