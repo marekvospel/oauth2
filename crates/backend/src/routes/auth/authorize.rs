@@ -2,6 +2,7 @@ use std::{io::Cursor, ops::Add};
 
 use ::entity::token::{self as Token};
 use base64::Engine;
+use entity::application;
 use rand::{rngs::OsRng, RngCore};
 use redis::AsyncCommands;
 use rocket::response::Responder;
@@ -23,12 +24,15 @@ use crate::{
     utils::auth::{generate_token, get_token_user_id, is_valid_token},
 };
 
+const ALLOWED_SCOPES: &'static [&'static str] = &["identity"];
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct AuthorizeData {
     scopes: String,
     token: String,
     state: Option<String>,
+    client_id: i64,
 }
 
 #[post("/api/internal/oauth2/authorize_code", data = "<body>")]
@@ -47,6 +51,23 @@ pub async fn authorize(
         return "Internal error".into();
     }
 
+    if !body
+        .scopes
+        .split_ascii_whitespace()
+        .all(|scope| ALLOWED_SCOPES.iter().any(|allowed| &scope == allowed))
+    {
+        return "Invalid scopes".into();
+    }
+
+    let application = application::Entity::find_by_id(body.client_id)
+        .one(db)
+        .await
+        .unwrap();
+
+    if application.is_none() {
+        return "Invalid app".into();
+    }
+
     let user_id = get_token_user_id(body.token.clone(), db).await.unwrap();
     let mut rng = OsRng::default();
     let mut result = [0; 32];
@@ -57,6 +78,7 @@ pub async fn authorize(
         user: user_id,
         scope: body.scopes.clone(),
         state: body.state.clone(),
+        application_id: body.client_id,
     };
 
     let _: () = redis
@@ -75,6 +97,8 @@ pub async fn authorize(
 pub struct TokenData {
     code: String,
     state: Option<String>,
+    application_id: i64,
+    application_secret: String,
 }
 
 #[post("/api/oauth2/token", data = "<body>")]
@@ -100,6 +124,20 @@ pub async fn token(
         return Err("Invalid state".into());
     }
 
+    if body.application_id != code.application_id {
+        return Err("Invalid application".into());
+    }
+
+    let app = application::Entity::find_by_id(body.application_id)
+        .filter(application::Column::Secret.eq(body.application_secret.clone()))
+        .one(db)
+        .await
+        .unwrap();
+
+    if app.is_none() {
+        return Err("Invalid application id or secret".into());
+    }
+
     let _: () = redis
         .del(format!("authorization_codes:{}", body.code))
         .await
@@ -110,7 +148,7 @@ pub async fn token(
 
     Token::Entity::delete_many()
         .filter(Token::Column::Owner.eq(code.user))
-        .filter(Token::Column::ClientId.is_null())
+        .filter(Token::Column::ApplicationId.eq(body.application_id))
         .exec(db)
         .await
         .unwrap();
@@ -122,7 +160,7 @@ pub async fn token(
         token_type: ActiveValue::Set("Bearer".into()),
         owner: ActiveValue::Set(code.user),
         expire: ActiveValue::Set(OffsetDateTime::now_utc().add(Duration::days(7))),
-        client_id: ActiveValue::Set(None),
+        application_id: ActiveValue::Set(Some(body.application_id)),
         scope: ActiveValue::Set(code.scope.clone()),
     }
     .insert(db)
@@ -168,4 +206,5 @@ pub struct AuthorizeCode {
     pub user: i64,
     pub scope: String,
     pub state: Option<String>,
+    pub application_id: i64,
 }

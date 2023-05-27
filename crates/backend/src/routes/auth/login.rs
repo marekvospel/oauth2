@@ -114,7 +114,7 @@ pub async fn login(
         token_type: ActiveValue::Set("Bearer".into()),
         owner: ActiveValue::Set(user.id),
         expire: ActiveValue::Set(OffsetDateTime::now_utc().add(Duration::days(7))),
-        client_id: ActiveValue::Set(None),
+        application_id: ActiveValue::Set(None),
         scope: ActiveValue::Set("me".into()),
     };
     token.insert(db).await?;
