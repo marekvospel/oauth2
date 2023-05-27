@@ -4,9 +4,11 @@ use ::entity::token;
 use ::entity::user;
 use argon2::password_hash::Error as ArgonError;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
+use rocket::http::Cookie;
+use rocket::http::CookieJar;
+use rocket::http::SameSite;
 use rocket::http::{ContentType, Status};
 use rocket::response::Responder;
-use rocket::serde::json::serde_json;
 use rocket::serde::{json::Json, Deserialize, Serialize};
 use rocket::{Request, Response};
 use sea_orm::*;
@@ -21,28 +23,6 @@ use time::{Duration, OffsetDateTime};
 pub struct LoginData {
     email: String,
     password: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(crate = "rocket::serde")]
-pub struct LoginSuccess {
-    access_token: String,
-    token_type: String,
-    expires_in: i64,
-}
-
-#[rocket::async_trait]
-impl<'r> Responder<'r, 'static> for LoginSuccess {
-    fn respond_to(self, _: &'r Request<'_>) -> rocket::response::Result<'static> {
-        let message = serde_json::to_string(&self)
-            .unwrap_or("{ \"error\": \"Internal server error\" }".to_string());
-
-        Response::build()
-            .header(ContentType::JSON)
-            .status(Status::Ok)
-            .sized_body(message.len(), Cursor::new(message))
-            .ok()
-    }
 }
 
 #[derive(Debug, Error)]
@@ -75,11 +55,12 @@ impl<'r> Responder<'r, 'static> for LoginError {
     }
 }
 
-#[post("/auth/login", data = "<input>")]
+#[post("/api/auth/login", data = "<input>")]
 pub async fn login(
     db: Connection<'_, Db>,
     input: Json<LoginData>,
-) -> Result<LoginSuccess, LoginError> {
+    cookies: &CookieJar<'_>,
+) -> Result<(), LoginError> {
     let db = db.into_inner();
 
     let user = user::Entity::find()
@@ -119,9 +100,12 @@ pub async fn login(
     };
     token.insert(db).await?;
 
-    Ok(LoginSuccess {
-        access_token,
-        token_type: "Bearer".into(),
-        expires_in: Duration::days(7).whole_seconds(),
-    })
+    let mut token_cookie = Cookie::new("token", access_token);
+    token_cookie.set_http_only(true);
+    token_cookie.set_same_site(SameSite::Strict);
+    token_cookie.set_expires(OffsetDateTime::now_utc().add(Duration::days(7)));
+
+    cookies.add(token_cookie);
+
+    Ok(())
 }

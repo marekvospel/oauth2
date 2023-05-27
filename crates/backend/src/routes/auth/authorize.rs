@@ -5,6 +5,7 @@ use base64::Engine;
 use entity::application;
 use rand::{rngs::OsRng, RngCore};
 use redis::AsyncCommands;
+use rocket::http::CookieJar;
 use rocket::response::Responder;
 use rocket::{
     form::{Form, FromForm},
@@ -30,21 +31,26 @@ const ALLOWED_SCOPES: &'static [&'static str] = &["identity"];
 #[serde(crate = "rocket::serde")]
 pub struct AuthorizeData {
     scopes: String,
-    token: String,
     state: Option<String>,
     client_id: i64,
 }
 
-#[post("/api/internal/oauth2/authorize_code", data = "<body>")]
+#[post("/api/oauth2/authorize", data = "<body>")]
 pub async fn authorize(
     body: Json<AuthorizeData>,
     db: Connection<'_, Db>,
     redis: &State<redis::Client>,
+    cookies: &CookieJar<'_>,
 ) -> String {
     let db = db.into_inner();
     let mut redis = redis.get_tokio_connection().await.unwrap();
 
-    if !is_valid_token(body.token.clone(), &["me".into()], db)
+    let token = match cookies.get("token") {
+        Some(cookie) => cookie.value(),
+        None => "",
+    };
+
+    if !is_valid_token(token.to_string(), &["me".into()], db)
         .await
         .unwrap_or(false)
     {
@@ -68,7 +74,7 @@ pub async fn authorize(
         return "Invalid app".into();
     }
 
-    let user_id = get_token_user_id(body.token.clone(), db).await.unwrap();
+    let user_id = get_token_user_id(token.to_string(), db).await.unwrap();
     let mut rng = OsRng::default();
     let mut result = [0; 32];
     rng.fill_bytes(&mut result);

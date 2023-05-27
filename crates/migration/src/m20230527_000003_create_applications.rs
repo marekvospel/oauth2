@@ -32,6 +32,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .unique_key(),
                     )
+                    .col(ColumnDef::new(Applications::Name).string().not_null())
                     .col(ColumnDef::new(Applications::Owner).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
@@ -57,6 +58,7 @@ impl MigrationTrait for Migration {
         manager
             .drop_foreign_key(
                 ForeignKey::drop()
+                    .table(Tokens::Table)
                     .name("tokens_owner_application_fk")
                     .to_owned(),
             )
@@ -83,6 +85,7 @@ enum Applications {
     Table,
     Id,
     Secret,
+    Name,
     Owner,
 }
 

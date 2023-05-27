@@ -10,6 +10,7 @@ pub struct Model {
     #[sea_orm(unique)]
     pub secret: String,
 
+    pub name: String,
     pub owner: i64,
 }
 
