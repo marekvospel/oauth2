@@ -24,12 +24,5 @@ fn rocket() -> _ {
     rocket::build()
         .attach(Db::init())
         .attach(AdHoc::try_on_ignite("Migrations", run_migrations))
-        .mount(
-            "/",
-            routes![
-                routes::auth::login::login,
-                routes::auth::oauth2::discord_redirect,
-                routes::auth::oauth2::discord_authorize
-            ],
-        )
+        .mount("/", routes![routes::auth::login::login,])
 }
