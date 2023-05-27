@@ -1,12 +1,9 @@
 use crate::database::Db;
+use crate::utils::auth::generate_token;
 use ::entity::token;
 use ::entity::user;
 use argon2::password_hash::Error as ArgonError;
 use argon2::{Argon2, PasswordHash, PasswordVerifier};
-use base64::Engine;
-use rand::rngs::OsRng;
-use rand::Error as RandError;
-use rand::RngCore;
 use rocket::http::{ContentType, Status};
 use rocket::response::Responder;
 use rocket::serde::json::serde_json;
@@ -29,7 +26,7 @@ pub struct LoginData {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct LoginSuccess {
-    token: String,
+    access_token: String,
     token_type: String,
     expires_in: i64,
 }
@@ -108,10 +105,7 @@ pub async fn login(
         }
     }
 
-    let mut rng = OsRng::default();
-    let mut result = [0; 256];
-    rng.fill_bytes(&mut result);
-    let access_token = base64::engine::general_purpose::STANDARD.encode(result);
+    let access_token = generate_token();
 
     let token = token::ActiveModel {
         token: ActiveValue::Set(access_token.clone()),
@@ -126,8 +120,8 @@ pub async fn login(
     token.insert(db).await?;
 
     Ok(LoginSuccess {
-        token: access_token,
-        token_type: "app_token".into(),
+        access_token,
+        token_type: "Bearer".into(),
         expires_in: Duration::days(7).whole_seconds(),
     })
 }

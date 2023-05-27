@@ -34,6 +34,7 @@ fn rocket() -> _ {
             routes![
                 routes::auth::login::login,
                 routes::auth::authorize::authorize,
+                routes::auth::authorize::token,
             ],
         )
 }

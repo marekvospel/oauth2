@@ -1,4 +1,7 @@
 use ::entity::token::{self as Token};
+use base64::Engine;
+use rand::rngs::OsRng;
+use rand::RngCore;
 use sea_orm::{DatabaseConnection, DbErr, EntityTrait};
 use time::OffsetDateTime;
 
@@ -29,4 +32,11 @@ pub async fn get_token_user_id(token: String, db: &DatabaseConnection) -> Result
     let token = Token::Entity::find_by_id(token).one(db).await?;
 
     Ok(token.unwrap().owner)
+}
+
+pub fn generate_token() -> String {
+    let mut rng = OsRng::default();
+    let mut result = [0; 256];
+    rng.fill_bytes(&mut result);
+    base64::engine::general_purpose::STANDARD.encode(result)
 }

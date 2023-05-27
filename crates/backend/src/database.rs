@@ -1,4 +1,4 @@
-use redis::{Client, Connection};
+use redis::Client;
 use rocket::{
     async_trait,
     fairing::Fairing,
