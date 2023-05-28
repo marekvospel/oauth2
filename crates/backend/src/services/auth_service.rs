@@ -58,6 +58,7 @@ pub struct OauthTokenResult {
 pub async fn is_valid_token(
     token: String,
     scopes: &[String],
+    allow_me: bool,
     db: &DatabaseConnection,
 ) -> Result<bool, DbErr> {
     let token = Token::Entity::find_by_id(token).one(db).await?;
@@ -73,9 +74,12 @@ pub async fn is_valid_token(
 
     let token_scopes = token.scope.split_ascii_whitespace();
 
-    Ok(scopes
-        .iter()
-        .all(|scope| token_scopes.clone().into_iter().any(|s| s == scope)))
+    Ok(scopes.iter().all(|scope| {
+        token_scopes
+            .clone()
+            .into_iter()
+            .any(|s| s == scope || (allow_me && s == "me"))
+    }))
 }
 
 pub async fn get_token_user_id(token: String, db: &DatabaseConnection) -> Result<i64, DbErr> {

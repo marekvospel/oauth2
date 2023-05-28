@@ -20,7 +20,7 @@ use crate::error::CustomError;
 use crate::services::auth_service::{
     create_oauth_token, generate_token, get_token_user_id, is_valid_token, OauthTokenResult,
 };
-use crate::BasicAuth;
+use crate::utils::BasicAuth;
 
 const ALLOWED_SCOPES: &'static [&'static str] = &["identity"];
 
@@ -102,7 +102,7 @@ pub async fn authorize(
         ));
     }
 
-    if !is_valid_token(token.to_string(), &["me".into()], db).await? {
+    if !is_valid_token(token.to_string(), &[], true, db).await? {
         return Err(CustomError::Custom(
             Status::Unauthorized,
             "Invalid token or insufficient scope".into(),

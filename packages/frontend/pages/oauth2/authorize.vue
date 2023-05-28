@@ -3,6 +3,8 @@ import { useRouteQuery } from '@vueuse/router'
 
 const route = useRoute()
 
+const { pending, error, refresh } = useMe()
+
 const responseType = useRouteQuery('response_type')
 const clientId = useRouteQuery('client_id')
 const scope = computed(() => useRouteQuery('scope', '').value.split(/\s+/))
@@ -81,8 +83,11 @@ function cancel() {
 
 <template>
   <div>
-    <a href="/login" class="text-blue-700">Login</a>
-    <AuthorizeError v-if="!validResponseType" error="Invalid response type"/>
+    <div v-if="pending">
+      Loading...
+    </div>
+    <LoginView v-else-if="error" @login="refresh"/>
+    <AuthorizeError v-else-if="!validResponseType" error="Invalid response type"/>
     <AuthorizeError v-else-if="!validScope" error="Invalid scope"/>
     <AuthorizeError v-else-if="!validClient" />
     <AuthorizeError v-else-if="!validRedirect" error="Invalid redirect" />
