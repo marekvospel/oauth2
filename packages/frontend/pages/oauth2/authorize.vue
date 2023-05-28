@@ -23,6 +23,8 @@ const validRedirect = computed(() => {
   }
 })
 
+const hi = ref()
+
 async function authorize(): Promise<void> {
 
   const result = await fetch('/api/oauth2/authorize', {
@@ -39,6 +41,7 @@ async function authorize(): Promise<void> {
     })
   })
   const data = await result.json()
+  hi.value = data
 
   if (result.ok && data.authorization_code) {
     const errorUri = new URL(reditectUri.value?.toString() ?? '')
@@ -78,6 +81,7 @@ function cancel() {
 
 <template>
   <div>
+    <a href="/login" class="text-blue-700">Login</a>
     <AuthorizeError v-if="!validResponseType" error="Invalid response type"/>
     <AuthorizeError v-else-if="!validScope" error="Invalid scope"/>
     <AuthorizeError v-else-if="!validClient" />

@@ -20,6 +20,7 @@ use crate::error::CustomError;
 use crate::services::auth_service::{
     create_oauth_token, generate_token, get_token_user_id, is_valid_token, OauthTokenResult,
 };
+use crate::BasicAuth;
 
 const ALLOWED_SCOPES: &'static [&'static str] = &["identity"];
 
@@ -70,8 +71,8 @@ pub struct AuthorizeData {
 pub struct TokenData {
     code: String,
     state: Option<String>,
-    application_id: i64,
-    application_secret: String,
+    client_id: Option<i64>,
+    client_secret: Option<String>,
     redirect_uri: String,
 }
 
@@ -156,6 +157,7 @@ pub async fn authorize(
 pub async fn token(
     body: Form<TokenData>,
     db: Connection<'_, Db>,
+    auth: BasicAuth,
     redis: &State<redis::Client>,
 ) -> Result<Json<OauthTokenResult>, CustomError> {
     let db = db.into_inner();
@@ -188,12 +190,40 @@ pub async fn token(
         ));
     }
 
-    let app = application::Entity::find_by_id(body.application_id)
-        .filter(application::Column::Secret.eq(body.application_secret.clone()))
+    let client_id = match body.client_id {
+        Some(c) => c,
+        None => match auth.get_username() {
+            Some(u) => u
+                .parse::<i64>()
+                .map_err(|_| CustomError::Custom(Status::BadRequest, "Invalid client_id".into()))?,
+            None => {
+                return Err(CustomError::Custom(
+                    Status::BadRequest,
+                    "Missing client_id".into(),
+                ))
+            }
+        },
+    };
+
+    let client_secret = match body.client_secret.clone() {
+        Some(c) => c,
+        None => match auth.get_password() {
+            Some(u) => u,
+            None => {
+                return Err(CustomError::Custom(
+                    Status::BadRequest,
+                    "Missing client_id".into(),
+                ))
+            }
+        },
+    };
+
+    let app = application::Entity::find_by_id(client_id)
+        .filter(application::Column::Secret.eq(client_secret))
         .one(db)
         .await?;
 
-    if body.application_id != code.application_id || app.is_none() {
+    if client_id != code.application_id || app.is_none() {
         return Err(CustomError::Custom(
             Status::BadRequest,
             "Incorrect application id or secret".into(),
