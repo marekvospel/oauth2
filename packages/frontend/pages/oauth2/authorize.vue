@@ -50,6 +50,20 @@ async function authorize(): Promise<void> {
     window.location.href = errorUri.toString()
   }
 
+  if (result.ok && data.access_token) {
+    const errorUri = new URL(reditectUri.value?.toString() ?? '')
+    const search = new URLSearchParams(errorUri.hash)
+    search.set('access_token', data.access_token)
+    if (data.refresh_token) search.set('refresh_token', data.refresh_token)
+    search.set('token_type', data.token_type)
+    search.set('expires_in', data.expires_in)
+    search.set('scope', data.scope)
+    if (route.query['state']) search.set('state', route.query['state']?.toString())
+    errorUri.hash = search.toString()
+
+    window.location.href = errorUri.toString()
+  }
+
 }
 
 function cancel() {

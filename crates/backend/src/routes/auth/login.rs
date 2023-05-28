@@ -1,6 +1,6 @@
 use crate::database::Db;
 use crate::error::CustomError;
-use crate::utils::auth::generate_token;
+use crate::services::auth_service::generate_token;
 use ::entity::token;
 use ::entity::user;
 use argon2::password_hash::Error as ArgonError;
@@ -42,22 +42,17 @@ pub async fn login(
         ));
     }
     let user = user.unwrap();
-    let hash = match PasswordHash::new(&user.password) {
-        Ok(h) => h,
-        Err(_) => return Err(CustomError::Simple),
-    };
+    let hash = PasswordHash::new(&user.password).map_err(|_| CustomError::Simple)?;
     let correct_password = Argon2::default().verify_password(input.password.as_bytes(), &hash);
 
-    if let Err(e) = correct_password {
-        return Err(match e {
-            ArgonError::Password => {
-                CustomError::Custom(Status::Unauthorized, "Invalid Credentials".into())
-            }
-            _ => CustomError::Simple,
-        });
-    }
+    correct_password.map_err(|e| match e {
+        ArgonError::Password => {
+            CustomError::Custom(Status::Unauthorized, "Invalid Credentials".into())
+        }
+        _ => CustomError::Simple,
+    })?;
 
-    let access_token = generate_token();
+    let access_token = generate_token(256);
 
     let token = token::ActiveModel {
         token: ActiveValue::Set(access_token.clone()),

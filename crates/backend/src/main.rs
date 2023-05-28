@@ -14,7 +14,7 @@ use migration::MigratorTrait;
 mod database;
 mod error;
 mod routes;
-mod utils;
+mod services;
 
 async fn run_migrations(rocket: Rocket<Build>) -> fairing::Result {
     let conn = &Db::fetch(&rocket).unwrap().conn;
