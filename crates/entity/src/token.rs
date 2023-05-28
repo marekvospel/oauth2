@@ -14,7 +14,7 @@ pub struct Model {
 
     pub owner: i64,
     pub expire: OffsetDateTime,
-    pub client_id: Option<i64>,
+    pub application_id: Option<i64>,
     pub scope: String,
 }
 
@@ -26,6 +26,12 @@ pub enum Relation {
         to = "super::user::Column::Id"
     )]
     Owner,
+    #[sea_orm(
+        belongs_to = "super::application::Entity",
+        from = "Column::ApplicationId",
+        to = "super::application::Column::Id"
+    )]
+    OwnerApplication,
 }
 
 impl Related<super::user::Entity> for Entity {

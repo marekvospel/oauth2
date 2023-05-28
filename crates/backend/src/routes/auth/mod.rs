@@ -1,2 +1,2 @@
+pub mod authorize;
 pub mod login;
-pub mod oauth2;

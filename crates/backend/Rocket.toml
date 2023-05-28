@@ -8,3 +8,6 @@
 # Postgres
 # make sure to enable "sqlx-postgres" feature in Cargo.toml, i.e default = ["sqlx-postgres"]
 url = "postgres://postgres:mysecretpassword@localhost:5432"
+
+[default.databases.redis]
+url = "redis://localhost"

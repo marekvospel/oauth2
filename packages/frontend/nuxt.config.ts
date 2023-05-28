@@ -5,11 +5,22 @@ export default defineNuxtConfig({
   modules: [
     '@unocss/nuxt',
     '@nuxtjs/i18n',
-    '@nuxt/devtools'
+    '@nuxt/devtools',
+    '@vueuse/nuxt'
   ],
   css: [
     '@unocss/reset/tailwind.css'
   ],
+  vite: {
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://127.0.0.1:8000',
+          changeOrigin: true,
+        }
+      }
+    }
+  },
   hooks: {
     'vite:extendConfig': (config, { isServer }) => {
       if (isServer) {

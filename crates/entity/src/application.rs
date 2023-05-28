@@ -1,32 +1,32 @@
 use rocket::serde::{Deserialize, Serialize};
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Deserialize, Serialize, FromForm)]
+#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Deserialize, Serialize)]
 #[serde(crate = "rocket::serde")]
-#[sea_orm(table_name = "connections")]
+#[sea_orm(table_name = "applications")]
 pub struct Model {
     #[sea_orm(primary_key)]
-    id: i64,
-    user: i64,
+    pub id: i64,
     #[sea_orm(unique)]
-    connection_id: String,
-    #[sea_orm(unique)]
-    connection_type: String,
+    pub secret: String,
+
+    pub name: String,
+    pub owner: i64,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
     #[sea_orm(
         belongs_to = "super::user::Entity",
-        from = "Column::User",
+        from = "Column::Owner",
         to = "super::user::Column::Id"
     )]
-    User,
+    Owner,
 }
 
 impl Related<super::user::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::User.def()
+        Relation::Owner.def()
     }
 }
 

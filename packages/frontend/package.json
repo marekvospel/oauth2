@@ -14,6 +14,9 @@
     "@nuxtjs/i18n": "8.0.0-beta.10",
     "@unocss/nuxt": "^0.50.4",
     "@unocss/reset": "^0.50.3",
+    "@vueuse/core": "^10.1.2",
+    "@vueuse/nuxt": "^10.1.2",
+    "@vueuse/router": "^10.1.2",
     "http-proxy-middleware": "^2.0.6",
     "nuxt": "^3.2.3",
     "typescript": "^4.9.5"
