@@ -3,6 +3,11 @@ name: Build
 env:
   REGISTRY: ghcr.io
 
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
 jobs:
   docker:
     runs-on: ubuntu-latest
