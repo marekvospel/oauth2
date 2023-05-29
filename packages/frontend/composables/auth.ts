@@ -1,13 +1,8 @@
-
 interface User {
-  id: number,
-  username: string,
+  id: number
+  username: string
   email: string
   error?: undefined
-}
-
-interface Failure {
-  error: string
 }
 
 export function useMe() {

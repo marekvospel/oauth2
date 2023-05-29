@@ -1,3 +1,3 @@
 <template>
-  <LoginView @login="$router.push('/')"/>
+  <LoginView @login="$router.push('/')" />
 </template>

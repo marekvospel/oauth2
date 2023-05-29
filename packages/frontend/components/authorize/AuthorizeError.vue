@@ -1,14 +1,12 @@
 <script setup lang="ts">
-
 interface Props {
   error?: string
 }
 
 withDefaults(defineProps<Props>(), {
-  error: 'Unknown application'
+  error: 'Unknown application',
 })
 </script>
-
 
 <template>
   <div>

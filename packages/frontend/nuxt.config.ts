@@ -6,10 +6,10 @@ export default defineNuxtConfig({
     '@unocss/nuxt',
     '@nuxtjs/i18n',
     '@nuxt/devtools',
-    '@vueuse/nuxt'
+    '@vueuse/nuxt',
   ],
   css: [
-    '@unocss/reset/tailwind.css'
+    '@unocss/reset/tailwind.css',
   ],
   vite: {
     server: {
@@ -17,18 +17,17 @@ export default defineNuxtConfig({
         '/api': {
           target: 'http://127.0.0.1:8000',
           changeOrigin: true,
-        }
-      }
-    }
+        },
+      },
+    },
   },
   hooks: {
     'vite:extendConfig': (config, { isServer }) => {
       if (isServer) {
-
         const noExternal = config.ssr!.noExternal as string[]
         noExternal.push('vue-i18n')
       }
-    }
+    },
   },
-  i18n
+  i18n,
 })

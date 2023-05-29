@@ -33,7 +33,7 @@ const locales: LocaleObjectData[] = [
   },
 ]
 
-const buildLocales = () => {
+function buildLocales() {
   const useLocales = Object.values(locales).reduce((acc, data) => {
     const locales = countryLocaleVariants[data.code]
     if (locales) {
