@@ -3,11 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "eslint": "eslint"
+    "eslint": "eslint",
+    "turbo": "turbo"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.39.3",
     "@types/express": "^4.17.17",
-    "eslint": "^8.41.0"
+    "eslint": "^8.41.0",
+    "turbo": "^1.9.9"
   }
 }
