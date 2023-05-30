@@ -16,7 +16,7 @@ const value = computed({
 </script>
 
 <template>
-  <div class="flex flex-col gap-1">
+  <div class="flex flex-col gap-1 w-full">
     <p class="text-xl font-normal">
       {{ label }}
     </p>
