@@ -3,6 +3,7 @@ interface Props {
   modelValue?: string
   placeholder: string
   label: string
+  type?: string
 }
 
 const props = defineProps<Props>()
@@ -15,11 +16,11 @@ const value = computed({
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-col gap-1">
     <p class="text-xl font-normal">
       {{ label }}
     </p>
 
-    <input v-model="value" :placeholder="placeholder" class="px-3 py-2 text-lg text-black rounded-md w-full">
+    <input v-model="value" :placeholder="placeholder" :type="type ?? 'text'" class="px-3 py-2 text-lg text-black rounded-md w-full">
   </div>
 </template>
