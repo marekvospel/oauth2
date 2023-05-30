@@ -44,6 +44,8 @@ async function register(): Promise<void> {
           <BasicInput v-model="registerData.email" label="email" placeholder="john.doe@example.com" />
           <BasicInput v-model="registerData.password" type="password" label="password" placeholder="$3cr3tPa$$w0rd" />
           <BasicInput v-model="registerData.passwordRepeat" type="password" label="repeat password" placeholder="$3cr3tPa$$w0rd" />
+          <BasicInput type="agree" placeholder="$3cr3tPa$$w0rd" />
+          <a href="/login" class="text-primary w-max">Sign in</a>
           <BasicButton text="Register" />
           <!-- <button type="submit">
                     Sign in

@@ -37,6 +37,7 @@ async function login(): Promise<void> {
         <form class="flex flex-col gap-2 w-full" @submit.prevent="login">
           <BasicInput v-model="loginData.email" label="email" placeholder="john.doe@example.com" />
           <BasicInput v-model="loginData.password" type="password" label="password" placeholder="$3cr3tPa$$w0rd" />
+          <a href="/register" class="text-primary w-max">Register</a>
           <BasicButton text="Sign in" />
           <!-- <button type="submit">
           Sign in
