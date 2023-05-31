@@ -86,7 +86,7 @@ function cancel() {
 
 <template>
   <div>
-    <div v-if="pending">
+    <!-- <div v-if="pending">
       Loading...
     </div>
     <LoginView v-else-if="error" @login="refresh" />
@@ -94,14 +94,16 @@ function cancel() {
     <AuthorizeError v-else-if="!validScope" error="Invalid scope" />
     <AuthorizeError v-else-if="!validClient" />
     <AuthorizeError v-else-if="!validRedirect" error="Invalid redirect" />
-    <form v-else @submit.prevent="authorize">
-      <p>An external application wants to access your account</p>
+  -->
+    <form>
+      <!-- <p>An external application wants to access your account</p>
       <button type="button" @click="cancel">
         Cancel
       </button>
       <button class="bg-green" type="submit">
         Authorize
-      </button>
+      </button> -->
+      <AuthorizeView username="User123" applicationName="SketchyApp" :claims="['identity', 'phone', 'address']"/>
     </form>
   </div>
 </template>
