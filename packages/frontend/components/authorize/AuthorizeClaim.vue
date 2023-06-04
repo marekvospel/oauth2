@@ -52,7 +52,7 @@ const description = computed(() => {
 
 
 <template>
-  <div class="flex flex-col justify-start b-1 rounded-8px w-100% p-10px">
+  <div class="flex flex-col justify-start b-1 b-dark-1 rounded-8px w-100% p-10px">
     <h1 class="text-2xl font-bold font-100 flex flex-col justify-center items-start ">{{ header }}</h1>
     <p class="text-lg font-100 flex flex-col justify-start items-start ">{{ description }}</p>
   </div>
