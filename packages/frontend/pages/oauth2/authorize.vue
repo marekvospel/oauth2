@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useRouteQuery } from '@vueuse/router'
 
+const router = useRouter()
 const route = useRoute()
 
-const { pending, error, refresh } = useMe()
+const { pending, error } = useMe()
 
 const responseType = useRouteQuery('response_type')
 const clientId = useRouteQuery('client_id')
@@ -82,19 +83,23 @@ function cancel() {
 
   window.location.href = errorUri.toString()
 }
+
+watchEffect(() => {
+  if (!pending.value && error.value)
+    router.replace(`/login/?redirect_to=${encodeURIComponent(route.fullPath)}`)
+})
 </script>
 
 <template>
   <div>
-    <div v-if="pending">
-      Loading...
-    </div>
-    <LoginView v-else-if="error" @login="refresh" />
-    <AuthorizeError v-else-if="!validResponseType" error="Invalid response type" />
+    <AuthorizeError v-if="!validResponseType" error="Invalid response type" />
     <AuthorizeError v-else-if="!validScope" error="Invalid scope" />
     <AuthorizeError v-else-if="!validClient" />
     <AuthorizeError v-else-if="!validRedirect" error="Invalid redirect" />
-    <form v-else @submit.prevent="authorize">
+    <div v-else-if="pending">
+      Loading...
+    </div>
+    <form v-else-if="!error" @submit.prevent="authorize">
       <p>An external application wants to access your account</p>
       <button type="button" @click="cancel">
         Cancel
