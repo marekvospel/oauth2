@@ -27,8 +27,8 @@ WORKDIR /app
 COPY --from=builder /build/ ./
 RUN pnpm i
 
-EXPOSE 5314/tcp
+EXPOSE 80/tcp
 
-ENV PORT=5314
+ENV PORT=80
 
 ENTRYPOINT ["node", "packages/frontend/.output/server/index.mjs"]
