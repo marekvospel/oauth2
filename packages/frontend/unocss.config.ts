@@ -11,4 +11,9 @@ export default defineConfig({
   transformers: [
     transformerDirectives({ enforce: 'pre' }),
   ],
+  theme: {
+    colors: {
+      primary: '#FF9900',
+    },
+  },
 })
