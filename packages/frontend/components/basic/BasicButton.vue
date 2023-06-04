@@ -4,11 +4,13 @@ interface Props {
   type?: 'submit' | 'button'
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  type: 'button',
+})
 </script>
 
 <template>
-  <button :type="type ?? 'button'" class="px-5 py-5 bg-primary rounded-md text-black font-semibold text-lg">
+  <button :type="type" class="px-5 py-5 bg-primary rounded-md text-black font-semibold text-lg">
     {{ text }}
   </button>
 </template>
