@@ -21,16 +21,29 @@ async function login(): Promise<void> {
     if (result.ok)
       emit('login')
   }
-  catch {}
+  catch { }
 }
 </script>
 
 <template>
-  <form class="flex flex-col gap-2 max-w-100" @submit.prevent="login">
-    <input v-model="loginData.email" class="bg-gray-300">
-    <input v-model="loginData.password" class="bg-gray-300">
-    <button type="submit">
-      Sign in
-    </button>
-  </form>
+  <div class="flex flex-col gap-8 justify-center md:flex-row w-full min-h-screen">
+    <div class="md:w-1/2 flex flex-col items-center justify-center">
+      <h1 class="text-5xl lg:text-6xl font-bold text-center">
+        Welcome back!
+      </h1>
+    </div>
+    <div class="md:w-1/2 flex flex-col justify-center items-center">
+      <div class="xl:w-120 lg:w-80 w-full flex shrink-0">
+        <form class="flex flex-col gap-2 w-full" @submit.prevent="login">
+          <BasicInput v-model="loginData.email" type="email" label="email" placeholder="john.doe@example.com" />
+          <BasicInput v-model="loginData.password" type="password" label="password" placeholder="$3cr3tPa$$w0rd" />
+          <a href="/register" class="text-primary w-max">Register</a>
+          <BasicButton type="submit" text="Sign in" />
+          <!-- <button type="submit">
+          Sign in
+        </button> -->
+        </form>
+      </div>
+    </div>
+  </div>
 </template>
