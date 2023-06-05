@@ -17,6 +17,7 @@ jobs:
       matrix:
         package:
           - crates/backend
+          - packages/frontend
     steps:
       - uses: actions/checkout@v3
       - name: Set up Docker Buildx

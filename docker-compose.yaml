@@ -7,6 +7,8 @@ services:
       POSTGRES_PASSWORD: mysecretpassword
     ports:
       - '5432:5432'
+    volumes:
+      - ./db:/data/db:rw
   redis:
     image: redis:alpine
     ports:

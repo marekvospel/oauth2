@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useRouteQuery } from '@vueuse/router'
 
+const router = useRouter()
 const route = useRoute()
 
-const { pending, error, refresh } = useMe()
+const { pending, error } = useMe()
 
 const responseType = useRouteQuery('response_type')
 const clientId = useRouteQuery('client_id')
@@ -82,6 +83,11 @@ function cancel() {
 
   window.location.href = errorUri.toString()
 }
+
+watchEffect(() => {
+  if (!pending.value && error.value)
+    router.replace(`/login/?redirect_to=${encodeURIComponent(route.fullPath)}`)
+})
 </script>
 
 <template>
