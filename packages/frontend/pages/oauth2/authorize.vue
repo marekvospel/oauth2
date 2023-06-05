@@ -113,7 +113,7 @@ watchEffect(() => {
               <BasicButton variant="outline" @click.prevent="cancel">Cancel</BasicButton>
             </div>
             <div class="flex sm:w-50 w-full">
-              <BasicButton>Authorize</BasicButton>
+              <BasicButton type="submit">Authorize</BasicButton>
             </div>
           </div>
         </div>

@@ -4,18 +4,20 @@ interface Props {
   variant?: 'fill' | 'outline'
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   type: 'button',
-  variant: 'fill'
+  variant: 'fill',
 })
 </script>
 
 <template>
-  <button :type="type" class="px-4 py-4 font-semibold text-lg rounded-md w-full"
-  :class="{
-    'variant-fill': variant === 'fill',
-    'variant-outline': variant === 'outline',
-  }">
+  <button
+    :type="type" class="px-4 py-4 font-semibold text-lg rounded-md w-full"
+    :class="{
+      'variant-fill': variant === 'fill',
+      'variant-outline': variant === 'outline',
+    }"
+  >
     <slot />
   </button>
 </template>
