@@ -1,4 +1,4 @@
-FROM node:alpine AS pruner
+FROM node:20-alpine3.18 AS pruner
 RUN apk add --no-cache libc6-compat
 RUN corepack enable pnpm && npm i -g turbo
 
@@ -7,7 +7,7 @@ COPY . .
 
 RUN turbo prune --scope="@vospel/oauth2-frontend" --docker
 
-FROM node:alpine AS builder
+FROM node:20-alpine3.18 AS builder
 RUN apk add --no-cache libc6-compat
 RUN corepack enable pnpm && npm i -g turbo
 
@@ -20,7 +20,7 @@ RUN pnpm i
 COPY --from=pruner /build/out/full/ .
 RUN turbo run build --filter=@vospel/oauth2-frontend
 
-FROM node:alpine
+FROM node:20-alpine3.18
 RUN corepack enable pnpm && npm i -g turbo
 
 WORKDIR /app
