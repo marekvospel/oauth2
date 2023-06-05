@@ -49,10 +49,9 @@ async function register(): Promise<void> {
           <BasicInput v-model="registerData.passwordRepeat" type="password" label="repeat password" placeholder="$3cr3tPa$$w0rd" />
           <BasicAgreementCheckbox v-model="registerData.agreement" placeholder="$3cr3tPa$$w0rd" />
           <a href="/login" class="text-primary w-max">Sign in</a>
-          <BasicButton type="submit" text="Register" />
-          <!-- <button type="submit">
-                    Sign in
-                </button> -->
+          <BasicButton type="submit">
+            Register
+          </BasicButton>
         </form>
       </div>
     </div>
