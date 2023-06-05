@@ -2,6 +2,7 @@
   "name": "@vospel/oauth2-workspace",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@7.18.2",
   "scripts": {
     "eslint": "eslint",
     "turbo": "turbo"
