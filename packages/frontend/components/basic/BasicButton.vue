@@ -1,6 +1,5 @@
 <script setup lang="ts">
 interface Props {
-  text: string
   type?: 'submit' | 'button'
   variant?: 'fill' | 'outline'
 }
@@ -9,19 +8,24 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'button',
   variant: 'fill'
 })
-
-const mainStyle = computed(() => {
-  if (props.variant === 'fill') {
-    return 'bg-primary text-black '
-  } else {
-    return 'border-solid border-2 border-primary text-primary'
-  }
-})
-
 </script>
 
 <template>
-  <button :type="type" :class="mainStyle" class="px-3 py-4 font-semibold variant text-lg rounded-md w-100%">
-    {{ text }}
+  <button :type="type" class="px-4 py-4 font-semibold text-lg rounded-md w-full"
+  :class="{
+    'variant-fill': variant === 'fill',
+    'variant-outline': variant === 'outline',
+  }">
+    <slot />
   </button>
 </template>
+
+<style scoped>
+.variant-fill {
+  @apply bg-primary text-black;
+}
+
+.variant-outline {
+  @apply border-solid border-2 border-primary text-primary;
+}
+</style>

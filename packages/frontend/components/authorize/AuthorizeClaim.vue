@@ -3,7 +3,7 @@
 
 
 interface Props {
-  claim: keyof typeof claims,
+  scope: keyof typeof claims,
 }
 
 const props = withDefaults(defineProps<Props>(), {})
@@ -29,21 +29,12 @@ const claims = {
 
 // def header
 const header = computed(() => {
-  try{
-    return claims[props.claim].header
-  }
-  catch{
-    throw new Error("Invalid claim")
-  }
+  console.log(props.scope);
+    return claims[props.scope]?.header
 })
 // def description
 const description = computed(() => {
-  try{
-    return claims[props.claim].description
-  }
-  catch{
-    throw new Error("Invalid claim")
-  }
+  return claims[props.scope]?.description
 })
 
 
@@ -52,9 +43,9 @@ const description = computed(() => {
 
 
 <template>
-  <div class="flex flex-col justify-start b-1 b-dark-1 rounded-8px w-100% p-10px">
-    <h1 class="text-2xl font-bold font-100 flex flex-col justify-center items-start ">{{ header }}</h1>
-    <p class="text-lg font-100 flex flex-col justify-start items-start ">{{ description }}</p>
+  <div class="flex flex-col justify-start border border-dark-1 rounded-lg w-full p-4">
+    <h1 class="text-2xl font-bold justify-center items-start ">{{ header }}</h1>
+    <p class="text-lg font-hairline flex flex-col justify-start items-start ">{{ description }}</p>
   </div>
 </template>
 

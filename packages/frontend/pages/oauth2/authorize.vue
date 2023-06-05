@@ -92,24 +92,32 @@ watchEffect(() => {
 
 <template>
   <div>
-    <!-- <div v-if="pending">
-      Loading...
-    </div>
-    <LoginView v-else-if="error" @login="refresh" />
-    <AuthorizeError v-else-if="!validResponseType" error="Invalid response type" />
+    <AuthorizeError v-if="!validResponseType" error="Invalid response type" />
     <AuthorizeError v-else-if="!validScope" error="Invalid scope" />
     <AuthorizeError v-else-if="!validClient" />
     <AuthorizeError v-else-if="!validRedirect" error="Invalid redirect" />
-  -->
-    <form>
-      <!-- <p>An external application wants to access your account</p>
-      <button type="button" @click="cancel">
-        Cancel
-      </button>
-      <button class="bg-green" type="submit">
-        Authorize
-      </button> -->
-      <AuthorizeView username="User123" applicationName="SketchyApp" :claims="['identity', 'phone', 'address']"/>
+    <div v-else-if="pending">
+      Loading...
+    </div>
+    <form v-else>
+      <div class="flex flex-row w-full min-h-screen h-fit">
+        <div class="w-200 sm:max-w-[80%] h-fit m-auto flex flex-col items-center border border-dark-300 rounded-lg p-3 w-[90%] sm:p-10">
+          <h1 class="text-2xl font-bold font-100 flex flex-col justify-center items-center mb-2em ">
+            Authorize {{ applicationName }} access to your:
+          </h1>
+          <div class="flex flex-col justify-start items-start w-full gap-2 max-h-[70%] overflow-auto">
+            <AuthorizeClaim v-for="scopeItem in scope" :scope="scopeItem" :key="scopeItem" />
+          </div>
+          <div class="flex flex-row flex-wrap gap-8 w-full justify-center mt-12">
+            <div class="flex sm:w-50 w-full">
+              <BasicButton variant="outline">Cancel</BasicButton>
+            </div>
+            <div class="flex sm:w-50 w-full">
+              <BasicButton>Authorize</BasicButton>
+            </div>
+          </div>
+        </div>
+      </div>
     </form>
   </div>
 </template>
