@@ -29,7 +29,6 @@ const claims = {
 
 // def header
 const header = computed(() => {
-  console.log(props.scope);
     return claims[props.scope]?.header
 })
 // def description
